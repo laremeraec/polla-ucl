@@ -1,0 +1,237 @@
+/* =============================================
+   UCL-SPECIFIC STYLES — Polla Champions League
+   ============================================= */
+
+/* UCL Match Card — Uniform, nothing overflows */
+.ucl-match-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.2rem 1.5rem;
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.ucl-match-date {
+    text-align: center;
+    color: #6cb4ee;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    width: 100%;
+    letter-spacing: 0.5px;
+}
+
+.ucl-live-marker {
+    width: 100%;
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    min-height: 1.4em;
+}
+
+.ucl-teams-row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+/* Each team block is a fixed-width flex container */
+.ucl-team {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.ucl-team.team-left {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.ucl-team.team-right {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+/* Team crest — uniform size */
+.ucl-crest {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: contain;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.06);
+    padding: 2px;
+}
+
+/* Team name — truncate if too long */
+.ucl-team-name {
+    font-size: 1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+/* Score inputs block in the center */
+.ucl-score-block {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    flex-shrink: 0;
+}
+
+.ucl-score-input {
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 86, 162, 0.4);
+    border-radius: 8px;
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s ease;
+    -moz-appearance: textfield;
+}
+
+.ucl-score-input::-webkit-outer-spin-button,
+.ucl-score-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.ucl-score-input:focus {
+    border-color: #6cb4ee;
+    box-shadow: 0 0 8px rgba(0, 86, 162, 0.4);
+}
+
+.ucl-score-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ucl-vs {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--text-muted);
+}
+
+/* Viewer modal — uniform team rows */
+.ucl-viewer-card {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.ucl-viewer-team {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.ucl-viewer-team.vt-left {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.ucl-viewer-team.vt-right {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.ucl-viewer-team .ucl-vname {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 0;
+}
+
+.ucl-viewer-crest {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.ucl-viewer-score {
+    padding: 0 8px;
+    font-weight: bold;
+    color: #6cb4ee;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ucl-match-card {
+        padding: 1rem 0.6rem;
+    }
+
+    .ucl-crest {
+        width: 32px;
+        height: 32px;
+    }
+
+    .ucl-team-name {
+        font-size: 0.82rem;
+    }
+
+    .ucl-score-input {
+        width: 42px;
+        height: 42px;
+        font-size: 1.1rem;
+    }
+
+    .ucl-score-block {
+        padding: 0 6px;
+        gap: 4px;
+    }
+
+    .ucl-team {
+        gap: 5px;
+    }
+
+    .ucl-vs {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .ucl-team-name {
+        font-size: 0.75rem;
+    }
+    .ucl-crest {
+        width: 28px;
+        height: 28px;
+    }
+    .ucl-score-input {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+}
