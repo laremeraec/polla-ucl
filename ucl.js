@@ -802,6 +802,15 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.textContent = '⏳ Exportando...';
             btn.disabled = true;
             try {
+                // Cargar SheetJS dinámicamente
+                if (!window.XLSX) {
+                    await new Promise((resolve, reject) => {
+                        const s = document.createElement('script');
+                        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                        s.onload = resolve; s.onerror = reject;
+                        document.head.appendChild(s);
+                    });
+                }
                 const usersSnap = await getDocs(collection(db, "usuarios"));
                 const rows = [['Nombre', 'Email', 'Teléfono', 'Ciudad', 'Provincia', 'Equipo Ecuador', 'Equipo Internacional', 'Es Ecuatoriano', 'Fecha Registro']];
                 usersSnap.forEach(d => {
@@ -820,24 +829,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         u.fecha_registro ? u.fecha_registro.split('T')[0] : ''
                     ]);
                 });
-                // Usar punto y coma como separador (Excel en español) y prefijo ' para forzar texto en teléfono
-                const csv = rows.map((r, i) => r.map((v, j) => {
-                    let val = String(v).replace(/"/g, '""');
-                    // Columna teléfono (índice 2): forzar como texto para preservar el 0
-                    if (i > 0 && j === 2 && val) val = val; // se preserva con comillas
-                    return `"${val}"`;
-                }).join(';')).join('\n');
-                const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `inscritos_ucl_${new Date().toISOString().split('T')[0]}.csv`;
-                a.click();
-                URL.revokeObjectURL(url);
+
+                const wb = window.XLSX.utils.book_new();
+                const ws = window.XLSX.utils.aoa_to_sheet(rows);
+
+                // Forzar columna Teléfono (col C) como texto
+                rows.forEach((row, i) => {
+                    if (i === 0) return;
+                    const cellRef = window.XLSX.utils.encode_cell({ r: i, c: 2 });
+                    ws[cellRef] = { v: row[2], t: 's' }; // t:'s' = string
+                });
+
+                // Ancho de columnas
+                ws['!cols'] = [{ wch: 30 }, { wch: 35 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 15 }, { wch: 15 }];
+
+                window.XLSX.utils.book_append_sheet(wb, ws, 'Inscritos UCL');
+                const fecha = new Date().toISOString().split('T')[0];
+                window.XLSX.writeFile(wb, `inscritos_ucl_${fecha}.xlsx`);
+
             } catch(e) {
                 alert('Error al exportar: ' + e.message);
             } finally {
-                btn.textContent = '📥 Exportar Inscritos CSV';
+                btn.textContent = '📥 Exportar Inscritos Excel';
                 btn.disabled = false;
             }
         };
