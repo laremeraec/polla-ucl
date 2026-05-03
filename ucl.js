@@ -423,6 +423,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${match.displayTime} ${isMatchLocked ? '<span style="color:#ef4444; font-weight:bold; margin-left:5px;">(Cerrado)</span>' : ''}
                     </div>
                     <div id="liveMarker_${match.id}" class="ucl-live-marker"></div>
+                    <div id="realScoreBox_${match.id}" style="display:none; margin: 0.5rem auto 1rem; max-width:340px; background:rgba(0,86,162,0.15); border:1px solid rgba(108,180,238,0.3); border-radius:10px; padding:0.6rem 1rem; text-align:center;">
+                        <div style="font-size:0.7rem; color:#9ca3af; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Resultado Oficial</div>
+                        <div id="realScoreVal_${match.id}" style="font-size:2rem; font-weight:900; color:#fff; letter-spacing:4px;">- : -</div>
+                        <div id="realScoreStatus_${match.id}" style="font-size:0.75rem; margin-top:4px; color:#6cb4ee;"></div>
+                    </div>
                     <div class="ucl-teams-row">
                         <div class="ucl-team team-left">
                             <span class="ucl-team-name">${match.team1}</span>
@@ -521,41 +526,63 @@ document.addEventListener('DOMContentLoaded', () => {
             const realData = lastResultados[m.id];
             if (realData) {
                 const markerEl = document.getElementById(`liveMarker_${m.id}`);
-                if (markerEl) {
-                    const statusCode = realData.status;
-                    let estadoTxt = statusCode;
-                    let color = "#6cb4ee";
-                    let isLive = false;
+                const scoreBox = document.getElementById(`realScoreBox_${m.id}`);
+                const scoreVal = document.getElementById(`realScoreVal_${m.id}`);
+                const scoreStatus = document.getElementById(`realScoreStatus_${m.id}`);
 
-                    if (statusCode === "1H")       { estadoTxt = "1er Tiempo";    isLive = true; }
-                    else if (statusCode === "2H")   { estadoTxt = "2do Tiempo";    isLive = true; }
-                    else if (statusCode === "HT")   { estadoTxt = "Medio Tiempo";  isLive = true; }
-                    else if (statusCode === "ET")   { estadoTxt = "Tiempo Extra";  isLive = true; }
-                    else if (statusCode === "P")    { estadoTxt = "⚡ Penales";    isLive = true; }
-                    else if (["PEN","FT","AET"].includes(statusCode)) { estadoTxt = "FINALIZADO ✓"; color = "#9ca3af"; }
+                const statusCode = realData.status;
+                let estadoTxt = statusCode;
+                let color = "#6cb4ee";
+                let isLive = false;
 
-                    if (isLive) color = "#22c55e";
+                if (statusCode === "1H")       { estadoTxt = "1er Tiempo";    isLive = true; }
+                else if (statusCode === "2H")   { estadoTxt = "2do Tiempo";    isLive = true; }
+                else if (statusCode === "HT")   { estadoTxt = "⏸ Medio Tiempo"; isLive = true; }
+                else if (statusCode === "ET")   { estadoTxt = "⏱ Tiempo Extra"; isLive = true; }
+                else if (statusCode === "P")    { estadoTxt = "⚡ Penales";    isLive = true; }
+                else if (["PEN","FT","AET"].includes(statusCode)) { estadoTxt = "✅ Finalizado"; color = "#22c55e"; }
 
-                    const baseMinute = realData.minute ? parseInt(realData.minute) : null;
-                    const snapshotTime = Date.now();
+                if (isLive) color = "#22c55e";
 
-                    const renderMarker = () => {
-                        let minStr = '';
-                        if (isLive && baseMinute !== null) {
-                            const elapsed = Math.floor((Date.now() - snapshotTime) / 60000);
-                            minStr = `(${baseMinute + elapsed}')`;
-                        }
-                        markerEl.innerHTML = `<span style="color:${color}; ${isLive ? 'animation:pulse 2s infinite;' : ''}">${estadoTxt} ${minStr} &nbsp;|&nbsp; <span style="font-size:1.3rem; color:#fff; font-weight:900;">${realData.s1} - ${realData.s2}</span></span>`;
-                    };
+                const baseMinute = realData.minute ? parseInt(realData.minute) : null;
+                const snapshotTime = Date.now();
 
-                    renderMarker();
+                // Actualizar recuadro de resultado oficial
+                if (scoreBox) {
+                    scoreBox.style.display = 'block';
+                    scoreBox.style.borderColor = isLive ? 'rgba(34,197,94,0.4)' : 'rgba(108,180,238,0.3)';
+                }
+                if (scoreVal) {
+                    scoreVal.textContent = `${realData.s1} - ${realData.s2}`;
+                    scoreVal.style.color = isLive ? '#22c55e' : '#fff';
+                }
 
+                const renderMarker = () => {
+                    let minStr = '';
                     if (isLive && baseMinute !== null) {
-                        liveTickerIntervals[m.id] = setInterval(() => {
-                            renderMarker();
-                            updateLeaderboardLiveStatus();
-                        }, 30000);
+                        const elapsed = Math.floor((Date.now() - snapshotTime) / 60000);
+                        minStr = ` · ${baseMinute + elapsed}'`;
                     }
+                    const statusFull = `${estadoTxt}${minStr}`;
+                    if (scoreStatus) {
+                        scoreStatus.textContent = statusFull;
+                        scoreStatus.style.color = isLive ? '#22c55e' : '#9ca3af';
+                        if (isLive) scoreStatus.style.animation = 'pulse 2s infinite';
+                    }
+                    if (markerEl) {
+                        markerEl.innerHTML = isLive
+                            ? `<span style="color:${color}; animation:pulse 2s infinite; font-size:0.85rem;">● En vivo ${minStr}</span>`
+                            : '';
+                    }
+                };
+
+                renderMarker();
+
+                if (isLive && baseMinute !== null) {
+                    liveTickerIntervals[m.id] = setInterval(() => {
+                        renderMarker();
+                        updateLeaderboardLiveStatus();
+                    }, 30000);
                 }
             }
         });
@@ -755,6 +782,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div style="text-align:center;margin-top:1.8rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
                     <button id="arSaveBtn" style="background:linear-gradient(135deg,#0056a2,#1a73c7);color:#fff;border:none;padding:0.75rem 2.2rem;border-radius:8px;font-weight:800;cursor:pointer;font-size:1rem;">💾 Guardar en Firebase</button>
+                    <button id="arExportBtn" style="background:linear-gradient(135deg,#166534,#16a34a);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.95rem;">📥 Exportar Inscritos CSV</button>
                     <button id="arCloseBtn" style="background:transparent;color:#9ca3af;border:1px solid rgba(255,255,255,0.15);padding:0.75rem 1.5rem;border-radius:8px;cursor:pointer;">Cerrar</button>
                 </div>
                 <p id="arMsg" style="text-align:center;margin-top:1rem;font-size:0.88rem;min-height:1.2rem;"></p>
@@ -764,6 +792,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('arCloseBtn').onclick = () => panel.remove();
         panel.addEventListener('click', e => { if (e.target === panel) panel.remove(); });
+
+        document.getElementById('arExportBtn').onclick = async () => {
+            const btn = document.getElementById('arExportBtn');
+            btn.textContent = '⏳ Exportando...';
+            btn.disabled = true;
+            try {
+                const usersSnap = await getDocs(collection(db, "usuarios"));
+                const rows = [['Nombre', 'Email', 'Teléfono', 'Ciudad', 'Provincia', 'Equipo Ecuador', 'Equipo Internacional', 'Es Ecuatoriano', 'Fecha Registro']];
+                usersSnap.forEach(d => {
+                    const u = d.data();
+                    rows.push([
+                        u.nombre_completo || '',
+                        u.email || '',
+                        u.telefono || '',
+                        u.ciudad || '',
+                        u.provincia || '',
+                        u.equipo_ecuador || '',
+                        u.equipo_internacional || '',
+                        u.es_de_ecuador ? 'Sí' : 'No',
+                        u.fecha_registro ? u.fecha_registro.split('T')[0] : ''
+                    ]);
+                });
+                const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+                const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `inscritos_ucl_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch(e) {
+                alert('Error al exportar: ' + e.message);
+            } finally {
+                btn.textContent = '📥 Exportar Inscritos CSV';
+                btn.disabled = false;
+            }
+        };
 
         document.getElementById('arSaveBtn').onclick = async () => {
             const btn = document.getElementById('arSaveBtn');

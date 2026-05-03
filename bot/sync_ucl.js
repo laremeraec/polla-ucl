@@ -16,10 +16,22 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 // 3. Diccionario de Partidos UCL Semifinales IDA
-// Mapeamos nombres de la API a nuestros IDs
 const matchesMap = {
-    "ucl1": { t1: ["arsenal"], t2: ["atletico", "atlético", "atletico de madrid"] },
-    "ucl2": { t1: ["bayern", "münchen", "munich"], t2: ["paris", "psg"] }
+    "ucl1": { t1: ["arsenal"], t2: ["atletico", "atlético", "atletico de madrid", "atlético de madrid"] },
+    "ucl2": { t1: ["bayern", "münchen", "munich", "fc bayern"], t2: ["paris", "psg", "paris saint-germain"] }
+};
+
+// Mapeo de estados football-data.org → nuestros códigos
+const STATUS_MAP = {
+    "SCHEDULED":   null,
+    "TIMED":       null,
+    "IN_PLAY":     "2H",   // en juego (se refina con half)
+    "PAUSED":      "HT",   // medio tiempo
+    "FINISHED":    "FT",
+    "SUSPENDED":   null,
+    "POSTPONED":   null,
+    "CANCELLED":   null,
+    "AWARDED":     "FT"
 };
 
 async function syncResults() {
@@ -31,48 +43,66 @@ async function syncResults() {
         const dateStr = ecuDate.toISOString().split('T')[0];
         console.log("Buscando partidos del día (hora ECU):", dateStr);
 
-        // Llamamos a API-Football
+        // football-data.org — UCL = código "CL", season 2025
         const response = await axios({
             method: 'GET',
-            url: `https://v3.football.api-sports.io/fixtures?date=${dateStr}&league=2&season=2025`,
+            url: `https://api.football-data.org/v4/competitions/CL/matches?dateFrom=${dateStr}&dateTo=${dateStr}`,
             headers: {
-                'x-apisports-key': process.env.API_SPORTS_KEY,
-                'x-rapidapi-host': 'v3.football.api-sports.io'
+                'X-Auth-Token': process.env.FOOTBALL_DATA_KEY
             }
         });
 
-        const fixtures = response.data.response;
+        const fixtures = response.data.matches;
         if (!fixtures || fixtures.length === 0) {
             console.log("ℹ️ No hay partidos UCL hoy. Bot finaliza correctamente.");
             process.exit(0);
         }
 
+        console.log(`Encontrados ${fixtures.length} partido(s) UCL hoy.`);
         let newScores = {};
 
         fixtures.forEach(match => {
-            const homeName = match.teams.home.name.toLowerCase();
-            const awayName = match.teams.away.name.toLowerCase();
+            const homeName = match.homeTeam.name.toLowerCase();
+            const awayName = match.awayTeam.name.toLowerCase();
 
             for (const [id, teams] of Object.entries(matchesMap)) {
-                const isMatch = (teams.t1.some(name => homeName.includes(name)) && teams.t2.some(name => awayName.includes(name))) ||
-                                (teams.t2.some(name => homeName.includes(name)) && teams.t1.some(name => awayName.includes(name)));
+                const isMatch =
+                    (teams.t1.some(n => homeName.includes(n)) && teams.t2.some(n => awayName.includes(n))) ||
+                    (teams.t2.some(n => homeName.includes(n)) && teams.t1.some(n => awayName.includes(n)));
 
                 if (isMatch) {
-                    let s1 = teams.t1.some(name => homeName.includes(name)) ? match.goals.home : match.goals.away;
-                    let s2 = teams.t2.some(name => homeName.includes(name)) ? match.goals.home : match.goals.away;
+                    const apiStatus = match.status;
+                    let statusCode = STATUS_MAP[apiStatus];
+
+                    // Refinar 1er vs 2do tiempo
+                    if (apiStatus === "IN_PLAY") {
+                        const minute = match.minute || 0;
+                        statusCode = minute <= 45 ? "1H" : "2H";
+                    }
+
+                    // Solo actualizar si el partido está en curso o terminado
+                    if (!statusCode) {
+                        console.log(`Partido [${id}] aún no ha comenzado (${apiStatus}).`);
+                        return;
+                    }
+
+                    let s1 = teams.t1.some(n => homeName.includes(n))
+                        ? (match.score.fullTime.home ?? match.score.halfTime.home ?? 0)
+                        : (match.score.fullTime.away ?? match.score.halfTime.away ?? 0);
+                    let s2 = teams.t2.some(n => homeName.includes(n))
+                        ? (match.score.fullTime.home ?? match.score.halfTime.home ?? 0)
+                        : (match.score.fullTime.away ?? match.score.halfTime.away ?? 0);
 
                     if (s1 === null) s1 = 0;
                     if (s2 === null) s2 = 0;
 
-                    if (["1H", "2H", "HT", "ET", "P", "FT", "AET", "PEN"].includes(match.fixture.status.short)) {
-                        newScores[id] = {
-                            s1: s1.toString(),
-                            s2: s2.toString(),
-                            status: match.fixture.status.short,
-                            minute: match.fixture.status.elapsed || null
-                        };
-                        console.log(`Actualizando [${id}]: ${homeName} ${match.goals.home} - ${match.goals.away} ${awayName} (${match.fixture.status.short} ${match.fixture.status.elapsed || ''}')`);
-                    }
+                    newScores[id] = {
+                        s1: s1.toString(),
+                        s2: s2.toString(),
+                        status: statusCode,
+                        minute: match.minute || null
+                    };
+                    console.log(`Actualizando [${id}]: ${homeName} ${s1} - ${s2} ${awayName} (${statusCode} ${match.minute || ''})`);
                 }
             }
         });
@@ -90,12 +120,12 @@ async function syncResults() {
 
     } catch (error) {
         console.error("❌ Error en sincronización UCL:", error.message);
-        // Solo falla si es día de partido (5 o 6 de mayo 2026)
         const ecuDate = new Date(Date.now() - 5 * 60 * 60 * 1000);
         const dateStr = ecuDate.toISOString().split('T')[0];
         const matchDays = ['2026-05-05', '2026-05-06'];
         if (matchDays.includes(dateStr)) {
-            process.exit(1); // Falla real en día de partido
+            console.error("❌ Error en día de partido — revisar urgente.");
+            process.exit(1);
         } else {
             console.log("ℹ️ Error fuera de días de partido — salida limpia.");
             process.exit(0);

@@ -30,7 +30,7 @@ jobs:
       - name: 🚀 Sincronizando Resultados Semifinales UCL en Vivo desde API
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
+          FOOTBALL_DATA_KEY: ${{ secrets.FOOTBALL_DATA_KEY }}
         run: |
           cd bot
           node sync_ucl.js
