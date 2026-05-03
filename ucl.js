@@ -847,8 +847,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const usersSnap = await getDocs(collection(db, "usuarios"));
                 const rows = [['Nombre', 'Email', 'Teléfono', 'Ciudad', 'Provincia', 'Equipo Ecuador', 'Equipo Internacional', 'Es Ecuatoriano', 'Fecha Registro']];
-                usersSnap.forEach(d => {
-                    const u = d.data();
+                const usersData = [];
+                usersSnap.forEach(d => { usersData.push(d.data()); });
+                // Ordenar alfabéticamente por nombre completo
+                usersData.sort((a, b) => (a.nombre_completo || '').localeCompare(b.nombre_completo || '', 'es'));
+                usersData.forEach(u => {
                     let tel = String(u.telefono || '');
                     if (tel && !tel.startsWith('0') && tel.length === 9) tel = '0' + tel;
                     rows.push([
