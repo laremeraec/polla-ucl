@@ -21,7 +21,7 @@ const db = getFirestore(app);
 // ==========================================================
 const CRESTS = {
     arsenal:   "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg",
-    atletico:  "https://upload.wikimedia.org/wikipedia/en/f/f4/Atletico_Madrid_2017_logo.svg",
+    atletico:  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Atletico_de_madrid_logo_2.svg/600px-Atletico_de_madrid_logo_2.svg.png",
     bayern:    "https://upload.wikimedia.org/wikipedia/commons/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg",
     psg:       "https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg"
 };
@@ -197,7 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let lastName = document.getElementById('lastName').value.trim();
         let fullName = `${firstName} ${lastName}`;
         fullName = fullName.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-        const phone = document.getElementById('phone').value;
+        let phone = document.getElementById('phone').value.trim();
+        // Asegurar que el teléfono se guarda como string con 0 al inicio
+        if (phone && !phone.startsWith('0') && phone.length === 9) phone = '0' + phone;
+        phone = String(phone);
         const dob = document.getElementById('dob').value;
         let city = document.getElementById('city').value.trim();
         city = city.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -766,7 +769,8 @@ document.addEventListener('DOMContentLoaded', () => {
         panel.innerHTML = `
             <div style="background:#0a0e17;border:1px solid rgba(0,86,162,0.45);border-radius:18px;padding:2rem;max-width:760px;width:96%;max-height:90vh;overflow-y:auto;">
                 <h2 style="color:#6cb4ee;text-align:center;margin-bottom:0.3rem;font-size:1.5rem;">🛡️ Panel de Resultados Semifinales UCL</h2>
-                <p style="text-align:center;color:#64748b;font-size:0.82rem;margin-bottom:1.5rem;">Ingresa el marcador y estado de cada semifinal.</p>
+                <p style="text-align:center;color:#64748b;font-size:0.82rem;margin-bottom:0.3rem;">El bot actualiza automáticamente cada 5 minutos durante los partidos.</p>
+                <p style="text-align:center;color:#64748b;font-size:0.78rem;margin-bottom:1.5rem;">Usa este panel solo para correcciones manuales si el bot falla.</p>
                 <div style="overflow-x:auto;">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead><tr style="color:#64748b;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.5px;">
@@ -802,10 +806,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rows = [['Nombre', 'Email', 'Teléfono', 'Ciudad', 'Provincia', 'Equipo Ecuador', 'Equipo Internacional', 'Es Ecuatoriano', 'Fecha Registro']];
                 usersSnap.forEach(d => {
                     const u = d.data();
+                    let tel = String(u.telefono || '');
+                    if (tel && !tel.startsWith('0') && tel.length === 9) tel = '0' + tel;
                     rows.push([
                         u.nombre_completo || '',
                         u.email || '',
-                        u.telefono || '',
+                        tel,
                         u.ciudad || '',
                         u.provincia || '',
                         u.equipo_ecuador || '',
