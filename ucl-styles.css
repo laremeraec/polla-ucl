@@ -74,13 +74,14 @@
     padding: 2px;
 }
 
-/* Team name — truncate if too long */
+/* Team name — wrap if too long */
 .ucl-team-name {
     font-size: 1rem;
     font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+    line-height: 1.2;
     min-width: 0;
 }
 

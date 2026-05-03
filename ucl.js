@@ -21,7 +21,7 @@ const db = getFirestore(app);
 // ==========================================================
 const CRESTS = {
     arsenal:   "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg",
-    atletico:  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Atletico_de_madrid_logo_2.svg/600px-Atletico_de_madrid_logo_2.svg.png",
+    atletico:  "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Atletico_Madrid_Logo_2024.svg/600px-Atletico_Madrid_Logo_2024.svg.png",
     bayern:    "https://upload.wikimedia.org/wikipedia/commons/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg",
     psg:       "https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg"
 };
