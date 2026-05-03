@@ -15,17 +15,15 @@ if (!admin.apps.length) {
 }
 const db = admin.firestore();
 
-// 3. Diccionario de Partidos UCL Cuartos de Final IDA
+// 3. Diccionario de Partidos UCL Semifinales IDA
 // Mapeamos nombres de la API a nuestros IDs
 const matchesMap = {
-    "ucl1": { t1: ["sporting"], t2: ["arsenal"] },
-    "ucl2": { t1: ["real madrid"], t2: ["bayern", "münchen", "munich"] },
-    "ucl3": { t1: ["barcelona"], t2: ["atletico", "atlético"] },
-    "ucl4": { t1: ["paris", "psg"], t2: ["liverpool"] }
+    "ucl1": { t1: ["arsenal"], t2: ["atletico", "atlético", "atletico de madrid"] },
+    "ucl2": { t1: ["bayern", "münchen", "munich"], t2: ["paris", "psg"] }
 };
 
 async function syncResults() {
-    console.log("⚽ Iniciando Bot Sincronizador UCL Champions League...");
+    console.log("⚽ Iniciando Bot Sincronizador Semifinales UCL Champions League...");
 
     try {
         // Usamos fecha en hora Ecuador (UTC-5)

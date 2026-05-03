@@ -17,27 +17,23 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // ==========================================================
-// ESCUDOS — Usamos logos-world.net (CDN público confiable)
+// ESCUDOS — Semifinales UCL 2025-2026
 // ==========================================================
 const CRESTS = {
-    sporting:  "https://upload.wikimedia.org/wikipedia/en/3/3e/Sporting_CP.png",
     arsenal:   "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg",
-    realmadrid:"https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg",
-    bayern:    "https://upload.wikimedia.org/wikipedia/commons/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg",
-    barcelona: "https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg",
     atletico:  "https://upload.wikimedia.org/wikipedia/en/f/f4/Atletico_Madrid_2017_logo.svg",
-    psg:       "https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg",
-    liverpool: "https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg"
+    bayern:    "https://upload.wikimedia.org/wikipedia/commons/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg",
+    psg:       "https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg"
 };
 
 // Herramienta de admin para pruebas
 window.simularPartidoUCL = async function(matchId, s1, s2, status, minute) {
-    console.log(`🤖 Forzando resultado UCL: ${matchId} [${s1}-${s2}]`);
+    console.log(`🤖 Forzando resultado Semifinal UCL: ${matchId} [${s1}-${s2}]`);
     await setDoc(doc(db, "admin_ucl", "resultados"), {
         partidos: { [matchId]: { s1: s1.toString(), s2: s2.toString(), status: status, minute: minute } },
         ultima_sincronizacion: new Date().toISOString()
     }, { merge: true });
-    console.log("✅ Simulación UCL completada.");
+    console.log("✅ Simulación Semifinal UCL completada.");
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -243,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await signInWithEmailAndPassword(auth, email, pwd);
             loginModal.classList.remove('show');
             loginForm.reset();
-            alert('¡Bienvenido de vuelta a la Polla UCL La Remera EC!');
+            alert('¡Bienvenido de vuelta a la Polla Semifinales UCL La Remera EC!');
         } catch (error) {
             if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password')
                 alert('Correo o contraseña incorrectos.');
@@ -278,10 +274,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ===============================================================
-    // PARTIDOS UCL — Cuartos de Final IDA — Champions League 2025-2026
+    // PARTIDOS UCL — Semifinales IDA — Champions League 2025-2026
     // ===============================================================
     // Hora Ecuador = UTC-5. Partidos a las 21:00 CET = 14:00 ECU
-    const CUTOFF_DATE = new Date("2026-04-07T14:00:00-05:00"); // Primer partido hoy
+    const CUTOFF_DATE = new Date("2026-05-05T14:00:00-05:00"); // Primer partido: Arsenal vs Atlético
 
     const dashboardSection = document.getElementById('dashboard');
     const matchesContainer = document.getElementById('matches-container');
@@ -290,31 +286,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const matchesList = [
         {
             id: "ucl1",
-            team1: "Sporting CP", crest1: CRESTS.sporting,
-            team2: "Arsenal",     crest2: CRESTS.arsenal,
-            time: "2026-04-07T14:00:00-05:00",
-            displayTime: "Martes 7 Abr · 14:00 (ECU)"
+            team1: "Arsenal",            crest1: CRESTS.arsenal,
+            team2: "Atlético de Madrid", crest2: CRESTS.atletico,
+            time: "2026-05-05T14:00:00-05:00",
+            displayTime: "Martes 5 May · 14:00 (ECU)"
         },
         {
             id: "ucl2",
-            team1: "Real Madrid", crest1: CRESTS.realmadrid,
-            team2: "Bayern Múnich", crest2: CRESTS.bayern,
-            time: "2026-04-07T14:00:00-05:00",
-            displayTime: "Martes 7 Abr · 14:00 (ECU)"
-        },
-        {
-            id: "ucl3",
-            team1: "FC Barcelona", crest1: CRESTS.barcelona,
-            team2: "Atlético de Madrid", crest2: CRESTS.atletico,
-            time: "2026-04-08T14:00:00-05:00",
-            displayTime: "Miércoles 8 Abr · 14:00 (ECU)"
-        },
-        {
-            id: "ucl4",
-            team1: "PSG",         crest1: CRESTS.psg,
-            team2: "Liverpool",   crest2: CRESTS.liverpool,
-            time: "2026-04-08T14:00:00-05:00",
-            displayTime: "Miércoles 8 Abr · 14:00 (ECU)"
+            team1: "Bayern Munich",      crest1: CRESTS.bayern,
+            team2: "PSG",                crest2: CRESTS.psg,
+            time: "2026-05-06T14:00:00-05:00",
+            displayTime: "Miércoles 6 May · 14:00 (ECU)"
         }
     ];
 
@@ -490,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     partidos: newPredictions,
                     ultima_actualizacion: new Date().toISOString()
                 }, { merge: true });
-                alert('¡Tus pronósticos UCL están guardados en la nube de La Remera EC!');
+                alert('¡Tus pronósticos de Semifinales UCL están guardados en la nube de La Remera EC!');
             } catch (err) {
                 alert('Error al guardar: ' + err.message);
             } finally {
@@ -628,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
         leaderboardBody.innerHTML = '';
 
         if (ranking.length === 0) {
-            leaderboardBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Aún no existen jugadores en la Polla UCL.</td></tr>';
+            leaderboardBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Aún no existen jugadores en la Polla Semifinales UCL.</td></tr>';
             return;
         }
 
@@ -747,8 +729,8 @@ document.addEventListener('DOMContentLoaded', () => {
         panel.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.88);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);';
         panel.innerHTML = `
             <div style="background:#0a0e17;border:1px solid rgba(0,86,162,0.45);border-radius:18px;padding:2rem;max-width:760px;width:96%;max-height:90vh;overflow-y:auto;">
-                <h2 style="color:#6cb4ee;text-align:center;margin-bottom:0.3rem;font-size:1.5rem;">🛡️ Panel de Resultados UCL</h2>
-                <p style="text-align:center;color:#64748b;font-size:0.82rem;margin-bottom:1.5rem;">Ingresa el marcador y estado de cada partido.</p>
+                <h2 style="color:#6cb4ee;text-align:center;margin-bottom:0.3rem;font-size:1.5rem;">🛡️ Panel de Resultados Semifinales UCL</h2>
+                <p style="text-align:center;color:#64748b;font-size:0.82rem;margin-bottom:1.5rem;">Ingresa el marcador y estado de cada semifinal.</p>
                 <div style="overflow-x:auto;">
                 <table style="width:100%;border-collapse:collapse;">
                     <thead><tr style="color:#64748b;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.5px;">
