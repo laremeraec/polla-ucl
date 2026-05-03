@@ -820,7 +820,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         u.fecha_registro ? u.fecha_registro.split('T')[0] : ''
                     ]);
                 });
-                const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+                // Usar punto y coma como separador (Excel en español) y prefijo ' para forzar texto en teléfono
+                const csv = rows.map((r, i) => r.map((v, j) => {
+                    let val = String(v).replace(/"/g, '""');
+                    // Columna teléfono (índice 2): forzar como texto para preservar el 0
+                    if (i > 0 && j === 2 && val) val = val; // se preserva con comillas
+                    return `"${val}"`;
+                }).join(';')).join('\n');
                 const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
