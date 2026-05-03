@@ -157,8 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             });
 
+            // Ocultar botones de registro inmediatamente
+            registerBtns.forEach(btn => {
+                btn.style.display = 'none';
+            });
+
             if (typeof loadDashboard === 'function') {
-                loadDashboard(user);
+                await loadDashboard(user);
+                // Scroll automático al dashboard
+                const dash = document.getElementById('dashboard');
+                if (dash) {
+                    setTimeout(() => dash.scrollIntoView({ behavior: 'smooth' }), 300);
+                }
             }
         } else {
             isUserRegistered = false;
@@ -239,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
             await signInWithEmailAndPassword(auth, email, pwd);
             loginModal.classList.remove('show');
             loginForm.reset();
-            alert('¡Bienvenido de vuelta a la Polla Semifinales UCL La Remera EC!');
         } catch (error) {
             if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password')
                 alert('Correo o contraseña incorrectos.');
