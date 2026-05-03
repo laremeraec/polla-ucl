@@ -521,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await setDoc(doc(db, "predicciones_ucl", user.uid), {
                     partidos: newPredictions,
-                    ultima_actualizacion: new Date().toISOString()
+                    ultima_actualizacion: new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false })
                 }, { merge: true });
                 alert('¡Tus pronósticos de Semifinales UCL están guardados en la nube de La Remera EC!');
             } catch (err) {
