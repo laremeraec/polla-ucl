@@ -171,12 +171,25 @@
             <form id="registerForm">
                 <div class="form-group row">
                     <div class="col">
-                        <label for="firstName">Nombres</label>
-                        <input type="text" id="firstName" name="nombres" required>
+                        <label for="firstName">Primer Nombre</label>
+                        <input type="text" id="firstName" name="primer_nombre" required placeholder="Ej. Carlos">
                     </div>
                     <div class="col">
-                        <label for="lastName">Apellidos</label>
-                        <input type="text" id="lastName" name="apellidos" required>
+                        <label for="secondName">Segundo Nombre</label>
+                        <input type="text" id="secondName" name="segundo_nombre" placeholder="Ej. Andrés">
+                        <label style="display:flex; align-items:center; gap:6px; margin-top:6px; font-size:0.82rem; color:var(--text-muted); cursor:pointer;">
+                            <input type="checkbox" id="noSecondName" style="width:auto; margin:0;"> No tengo segundo nombre
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col">
+                        <label for="firstLastName">Primer Apellido</label>
+                        <input type="text" id="firstLastName" name="primer_apellido" required placeholder="Ej. García">
+                    </div>
+                    <div class="col">
+                        <label for="secondLastName">Segundo Apellido</label>
+                        <input type="text" id="secondLastName" name="segundo_apellido" required placeholder="Ej. López">
                     </div>
                 </div>
                 <div class="form-group">
@@ -268,10 +281,6 @@
                         <option value="Otros">Otros (Escribir)</option>
                     </select>
                     <input type="text" id="otherInternationalTeam" name="otro_equipo_internacional" placeholder="Escribe el nombre del equipo..." style="display: none; margin-top: 10px;">
-                </div>
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="confirmFullName" name="confirma_nombre" required>
-                    <label for="confirmFullName">Confirmo que en el registro he incluido todos mis nombres (en caso de tener más de uno) y dos apellidos</label>
                 </div>
                 <div class="form-group checkbox-group">
                     <input type="checkbox" id="isEcuadorian" name="es_de_ecuador" value="Si" required>

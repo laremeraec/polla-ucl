@@ -40,6 +40,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
 
     // Selector de equipos
+    // Checkbox "No tengo segundo nombre"
+    const noSecondNameChk = document.getElementById('noSecondName');
+    const secondNameInput = document.getElementById('secondName');
+    if (noSecondNameChk && secondNameInput) {
+        noSecondNameChk.addEventListener('change', () => {
+            if (noSecondNameChk.checked) {
+                secondNameInput.value = '';
+                secondNameInput.disabled = true;
+                secondNameInput.style.opacity = '0.4';
+            } else {
+                secondNameInput.disabled = false;
+                secondNameInput.style.opacity = '1';
+            }
+        });
+    }
+
     const selectLocalTeam = document.getElementById('localTeam');
     const inputOtherLocalTeam = document.getElementById('otherLocalTeam');
     if(selectLocalTeam && inputOtherLocalTeam) {
@@ -193,9 +209,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const email = document.getElementById('email').value.toLowerCase().trim();
-        let firstName = document.getElementById('firstName').value.trim();
-        let lastName = document.getElementById('lastName').value.trim();
-        let fullName = `${firstName} ${lastName}`;
+
+        // Validar campos obligatorios de nombre
+        const firstName = document.getElementById('firstName').value.trim();
+        const noSecondName = document.getElementById('noSecondName').checked;
+        const secondName = document.getElementById('secondName').value.trim();
+        const firstLastName = document.getElementById('firstLastName').value.trim();
+        const secondLastName = document.getElementById('secondLastName').value.trim();
+
+        if (!firstName) { alert('Por favor ingresa tu Primer Nombre.'); return; }
+        if (!noSecondName && !secondName) { alert('Por favor ingresa tu Segundo Nombre o marca "No tengo segundo nombre".'); return; }
+        if (!firstLastName) { alert('Por favor ingresa tu Primer Apellido.'); return; }
+        if (!secondLastName) { alert('Por favor ingresa tu Segundo Apellido.'); return; }
+
+        // Construir nombre completo
+        const nameParts = [firstName, noSecondName ? '' : secondName, firstLastName, secondLastName].filter(p => p);
+        let fullName = nameParts.join(' ');
         fullName = fullName.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
         let phone = document.getElementById('phone').value.trim();
         // Asegurar que el teléfono se guarda como string con 0 al inicio
@@ -221,7 +250,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, pwd1);
             const user = userCredential.user;
             await setDoc(doc(db, "usuarios", user.uid), {
-                nombre_completo: fullName, email, telefono: phone, fecha_nacimiento: dob,
+                nombre_completo: fullName,
+                primer_nombre: firstName,
+                segundo_nombre: noSecondName ? '' : secondName,
+                primer_apellido: firstLastName,
+                segundo_apellido: secondLastName,
+                email, telefono: phone, fecha_nacimiento: dob,
                 ciudad: city, provincia: province, equipo_ecuador: localTeam,
                 equipo_internacional: internationalTeam, es_de_ecuador: isEcuadorian,
                 fecha_registro: new Date().toISOString()
