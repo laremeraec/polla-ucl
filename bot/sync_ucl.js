@@ -43,8 +43,8 @@ async function syncResults() {
 
         const fixtures = response.data.response;
         if (!fixtures || fixtures.length === 0) {
-            console.log("No se encontraron partidos UCL para hoy.");
-            return;
+            console.log("ℹ️ No hay partidos UCL hoy. Bot finaliza correctamente.");
+            process.exit(0);
         }
 
         let newScores = {};
@@ -90,7 +90,16 @@ async function syncResults() {
 
     } catch (error) {
         console.error("❌ Error en sincronización UCL:", error.message);
-        process.exit(1);
+        // Solo falla si es día de partido (5 o 6 de mayo 2026)
+        const ecuDate = new Date(Date.now() - 5 * 60 * 60 * 1000);
+        const dateStr = ecuDate.toISOString().split('T')[0];
+        const matchDays = ['2026-05-05', '2026-05-06'];
+        if (matchDays.includes(dateStr)) {
+            process.exit(1); // Falla real en día de partido
+        } else {
+            console.log("ℹ️ Error fuera de días de partido — salida limpia.");
+            process.exit(0);
+        }
     }
 }
 
